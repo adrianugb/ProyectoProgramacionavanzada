@@ -1,0 +1,54 @@
+﻿@model IEnumerable<ProyectoFinal_G1_Autenticado.Models.Product>
+@{
+    ViewBag.Title = "Catálogo de Productos";
+}
+
+<h2>Catálogo de Productos</h2>
+
+<p>
+    @if (User.IsInRole("Administrador"))
+    {
+        @Html.ActionLink("Crear Producto", "Create", null, new { @class = "btn btn-primary" })
+    }
+</p>
+
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Imagen</th>
+            <th>Código</th>
+            <th>Nombre</th>
+            <th>Precio</th>
+            <th>Stock</th>
+            <th>Estado</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            var firstImg = item.Images?.OrderBy(i => i.SortOrder).FirstOrDefault();
+            <tr>
+                <td style="width:120px;">
+                    @if (firstImg != null)
+                    {
+                        <img src="@Url.Action("GetImage", "Product", new { id = firstImg.Id })" alt="img" class="img-thumbnail" style="max-height:80px;" />
+                    }
+                </td>
+                <td>@item.Code</td>
+                <td>@Html.ActionLink(item.Name, "Details", new { id = item.Id })</td>
+                <td>@String.Format("{0:C}", item.Price)</td>
+                <td>@item.Stock</td>
+                <td>@item.Status</td>
+                <td>
+                    <a class="btn btn-sm btn-info" href="@Url.Action("Details", new { id = item.Id })">Ver</a>
+                    @if (User.IsInRole("Administrador"))
+                    {
+                        <a class="btn btn-sm btn-warning" href="@Url.Action("Edit", new { id = item.Id })">Editar</a>
+                        <a class="btn btn-sm btn-danger" href="@Url.Action("Delete", new { id = item.Id })">Eliminar</a>
+                    }
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

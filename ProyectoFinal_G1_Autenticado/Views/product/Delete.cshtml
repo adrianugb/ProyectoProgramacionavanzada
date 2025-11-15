@@ -1,0 +1,23 @@
+﻿@model ProyectoFinal_G1_Autenticado.Models.Product
+@{
+    ViewBag.Title = "Eliminar Producto";
+}
+
+<h2>Eliminar Producto</h2>
+
+<div>
+    <h4>@Model.Name</h4>
+    <p>Código: @Model.Code</p>
+    <p>Precio: @String.Format("{0:C}", Model.Price)</p>
+    <p>Stock: @Model.Stock</p>
+</div>
+
+@using (Html.BeginForm("Delete", "Product", FormMethod.Post))
+{
+    @Html.AntiForgeryToken()
+    @Html.HiddenFor(m => m.Id)
+    <button type="submit" class="btn btn-danger">Eliminar</button>
+    @Html.ActionLink("Cancelar", "Index", "Product", null, new { @class = "btn btn-default" })
+}
+
+

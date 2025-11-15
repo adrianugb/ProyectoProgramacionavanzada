@@ -1,0 +1,67 @@
+﻿@model ProyectoFinal_G1_Autenticado.Models.Product
+@{
+    ViewBag.Title = "Detalle del producto";
+}
+
+<h2>@Model.Name</h2>
+
+<div class="row">
+    <div class="col-md-6">
+        <div class="carousel slide" id="productCarousel" data-ride="carousel">
+            <div class="carousel-inner">
+                @{
+                    var images = Model.Images?.OrderBy(i => i.SortOrder).ToList() ?? new List<ProyectoFinal_G1_Autenticado.Models.ProductImage>();
+                    for (int i = 0; i < images.Count; i++)
+                    {
+                        var img = images[i];
+                        <div class="carousel-item @(i == 0 ? "active" : "")">
+                            <img class="d-block w-100" src="@Url.Action("GetImage", "Product", new { id = img.Id })" alt="">
+                        </div>
+                    }
+                }
+            </div>
+            <a class="carousel-control-prev" href="#productCarousel" role="button" data-slide="prev">
+                <span class="carousel-control-prev-icon"></span>
+            </a>
+            <a class="carousel-control-next" href="#productCarousel" role="button" data-slide="next">
+                <span class="carousel-control-next-icon"></span>
+            </a>
+        </div>
+    </div>
+
+    <div class="col-md-6">
+        <h4>Código: @Model.Code</h4>
+        <h4>Precio: @String.Format("{0:C}", Model.Price)</h4>
+        <h4>Stock: @Model.Stock</h4>
+        <h4>Estado: @Model.Status</h4>
+
+        @if (User.IsInRole("Asociado"))
+        {
+            <p>
+                <a href="@Url.Action("Add","Cart", new { productId = Model.Id })" class="btn btn-success">Agregar al carrito</a>
+            </p>
+        }
+    </div>
+</div>
+
+<hr />
+
+<h4>Reseñas</h4>
+@if (Model.Reviews != null && Model.Reviews.Any())
+{
+    foreach (var r in Model.Reviews)
+    {
+        <div class="card mb-2">
+            <div class="card-body">
+                <strong>Rating: @r.Rating / 5</strong>
+                <p>@r.Comment</p>
+                <small class="text-muted">@r.CreatedAt.ToString("g")</small>
+            </div>
+        </div>
+    }
+}
+else
+{
+    <p>No hay reseñas aprobadas para este producto.</p>
+}
+

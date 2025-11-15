@@ -1,0 +1,27 @@
+﻿@model ProyectoFinal_G1_Autenticado.Models.EditRolesViewModel
+
+@{
+    ViewBag.Title = "Editar Roles";
+}
+
+<h2>Editar Roles de @Model.Email</h2>
+
+@using (Html.BeginForm())
+{
+    @Html.AntiForgeryToken()
+
+    <div class="form-group">
+        @for (int i = 0; i < Model.RolesList.Count; i++)
+        {
+            <div class="checkbox">
+                <label>
+                    @Html.CheckBox("SelectedRoles", Model.RolesList[i].Selected, new { value = Model.RolesList[i].Value })
+                    @Model.RolesList[i].Text
+                </label>
+            </div>
+        }
+    </div>
+
+    <input type="hidden" name="UserId" value="@Model.UserId" />
+    <button type="submit" class="btn btn-primary">Guardar</button>
+}

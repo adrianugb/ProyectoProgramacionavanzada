@@ -1,0 +1,45 @@
+﻿@model ProyectoFinal_G1_Autenticado.Models.Product
+
+@{
+    ViewBag.Title = "Crear Producto";
+}
+
+<h2>Crear Producto</h2>
+
+@using (Html.BeginForm("Create", "Product", FormMethod.Post, new { enctype = "multipart/form-data" }))
+{
+    @Html.AntiForgeryToken()
+    @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+
+    <div class="form-group">
+        @Html.LabelFor(m => m.Code)
+        @Html.TextBoxFor(m => m.Code, new { @class = "form-control" })
+        @Html.ValidationMessageFor(m => m.Code)
+    </div>
+
+    <div class="form-group">
+        @Html.LabelFor(m => m.Name)
+        @Html.TextBoxFor(m => m.Name, new { @class = "form-control" })
+        @Html.ValidationMessageFor(m => m.Name)
+    </div>
+
+    <div class="form-group">
+        @Html.LabelFor(m => m.Price)
+        @Html.TextBoxFor(m => m.Price, new { @class = "form-control", type = "number", step = "0.01" })
+        @Html.ValidationMessageFor(m => m.Price)
+    </div>
+
+    <div class="form-group">
+        @Html.LabelFor(m => m.Stock)
+        @Html.TextBoxFor(m => m.Stock, new { @class = "form-control", type = "number" })
+        @Html.ValidationMessageFor(m => m.Stock)
+    </div>
+
+    <div class="form-group">
+        @Html.Label("Imágenes (mínimo 3)")
+        <input type="file" name="images" multiple class="form-control" />
+    </div>
+
+    <button type="submit" class="btn btn-primary">Guardar</button>
+    @Html.ActionLink("Cancelar", "Index", "Product", null, new { @class = "btn btn-default" })
+}
