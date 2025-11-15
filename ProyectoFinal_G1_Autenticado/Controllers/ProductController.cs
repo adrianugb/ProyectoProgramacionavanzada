@@ -32,7 +32,6 @@ namespace ProyectoFinal_G1_Autenticado.Controllers
             if (product == null)
                 return HttpNotFound();
 
-            // Cambiar estado
             product.Status = product.Status == ProductStatus.Activo
                 ? ProductStatus.Inactivo
                 : ProductStatus.Activo;
