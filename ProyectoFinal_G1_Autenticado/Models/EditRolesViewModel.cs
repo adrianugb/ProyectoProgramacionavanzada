@@ -7,9 +7,7 @@ namespace ProyectoFinal_G1_Autenticado.Models
     {
         public string UserId { get; set; }
         public string Email { get; set; }
-
+        public string SelectedRole { get; set; }
         public List<SelectListItem> RolesList { get; set; }
-
-        public string[] SelectedRoles { get; set; }
     }
 }

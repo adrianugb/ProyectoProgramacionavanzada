@@ -4,24 +4,36 @@
     ViewBag.Title = "Editar Roles";
 }
 
-<h2>Editar Roles de @Model.Email</h2>
+<h2>Editar Roles de Usuario</h2>
 
-@using (Html.BeginForm())
-{
-    @Html.AntiForgeryToken()
+<div class="card" style="padding:20px;">
+    <h4>Usuario: @Model.Email</h4>
+    <hr />
 
-    <div class="form-group">
-        @for (int i = 0; i < Model.RolesList.Count; i++)
-        {
-            <div class="checkbox">
-                <label>
-                    @Html.CheckBox("SelectedRoles", Model.RolesList[i].Selected, new { value = Model.RolesList[i].Value })
-                    @Model.RolesList[i].Text
-                </label>
-            </div>
-        }
-    </div>
+    @using (Html.BeginForm("EditRoles", "Admin", FormMethod.Post))
+    {
+        @Html.AntiForgeryToken()
+        @Html.HiddenFor(m => m.UserId)
 
-    <input type="hidden" name="UserId" value="@Model.UserId" />
-    <button type="submit" class="btn btn-primary">Guardar</button>
-}
+<div class="form-group">
+    <label>Roles disponibles:</label>
+
+    @foreach (var role in Model.RolesList)
+    {
+        <div class="radio">
+            <label>
+                <input type="radio"
+                       name="SelectedRole"
+                       value="@role.Value"
+                       @(Model.SelectedRole == role.Value ? "checked" : "") />
+                @role.Text
+            </label>
+        </div>
+    }
+</div>
+
+        <br />
+
+        <button type="submit" class="btn btn-primary">Guardar Cambios</button>
+        @Html.ActionLink("Volver", "ListUsers", "Admin", null, new { @class = "btn btn-secondary" })
+    }

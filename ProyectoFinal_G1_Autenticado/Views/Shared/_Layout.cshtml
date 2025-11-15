@@ -24,6 +24,10 @@
                     <li>@Html.ActionLink("Contacto", "Contact", "Home", new { area = "" }, new { @class = "nav-link" })</li>
 
                     <li>@Html.ActionLink("Producto", "Index", "Product", new { area = "" }, new { @class = "nav-link" })</li>
+                    @if (User.IsInRole("Administrador"))
+                    {
+                        <li> @Html.ActionLink( "Cambio de Roles", "ListUsers","Admin",null,new { @class = "nav-link" } )</li>
+                    }
                 </ul>
                  @Html.Partial("_LoginPartial")
             </div>

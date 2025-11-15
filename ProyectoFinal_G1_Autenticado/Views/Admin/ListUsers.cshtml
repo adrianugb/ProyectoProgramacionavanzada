@@ -1,0 +1,40 @@
+﻿@model List<ProyectoFinal_G1_Autenticado.Models.EditRolesViewModel>
+
+@{
+    ViewBag.Title = "Lista de Usuarios";
+}
+
+<h2>Gestión de Roles</h2>
+
+<table class="table table-bordered table-striped">
+    <thead>
+        <tr>
+            <th>Email</th>
+            <th>Roles Actuales</th>
+            <th>Acción</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var user in Model)
+        {
+            <tr>
+                <td>@user.Email</td>
+                <td>
+                    @if (!string.IsNullOrEmpty(user.SelectedRole))
+                    {
+                        @user.SelectedRole
+                    }
+                    else
+                    {
+                        <span class="text-muted">Sin rol</span>
+                    }
+                </td>
+                <td>
+                    @Html.ActionLink("Editar Roles", "EditRoles", "Admin",
+                        new { id = user.UserId },
+                        new { @class = "btn btn-primary btn-sm" })
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

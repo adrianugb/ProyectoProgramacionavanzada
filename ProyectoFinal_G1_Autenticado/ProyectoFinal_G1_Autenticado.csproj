@@ -269,6 +269,7 @@
     <Content Include="Views\product\Edit.cshtml" />
     <Content Include="Views\product\Index.cshtml" />
     <Content Include="Views\Admin\EditRoles.cshtml" />
+    <Content Include="Views\Admin\ListUsers.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

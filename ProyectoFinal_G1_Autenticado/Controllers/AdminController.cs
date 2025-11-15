@@ -20,57 +20,78 @@ namespace ProyectoFinal_G1_Autenticado.Controllers
             roleManager = new RoleManager<IdentityRole>(new RoleStore<IdentityRole>(db));
         }
 
-        // Lista usuarios
-        public ActionResult Users()
+        // LISTA DE USUARIOS (vista principal)
+        public ActionResult ListUsers()
         {
             var users = db.Users.ToList();
-            return View(users);
+
+            var model = users.Select(u => new EditRolesViewModel
+            {
+                UserId = u.Id,
+                Email = u.Email,
+                SelectedRole = userManager.GetRoles(u.Id).FirstOrDefault(),
+                RolesList = roleManager.Roles.Select(r => new SelectListItem
+                {
+                    Text = r.Name,
+                    Value = r.Name
+                }).ToList()
+            }).ToList();
+
+            return View(model);
         }
 
-        // GET: Editar roles de un usuario
-        public async Task<ActionResult> EditRoles(string id)
+        //GET: Edit roles de un usuario
+        public ActionResult EditRoles(string id)
         {
             if (id == null) return HttpNotFound();
 
-            var user = await userManager.FindByIdAsync(id);
+            var user = db.Users.Find(id);
             if (user == null) return HttpNotFound();
+
+            var userRole = userManager.GetRoles(user.Id).FirstOrDefault();
+
+            var allRoles = roleManager.Roles
+                .Select(r => new SelectListItem
+                {
+                    Value = r.Name,
+                    Text = r.Name
+                }).ToList();
 
             var model = new EditRolesViewModel
             {
                 UserId = user.Id,
                 Email = user.Email,
-                RolesList = roleManager.Roles
-                                .Select(r => new SelectListItem
-                                {
-                                    Selected = userManager.IsInRole(user.Id, r.Name),
-                                    Text = r.Name,
-                                    Value = r.Name
-                                }).ToList()
+                RolesList = allRoles,
+                SelectedRole = userRole
             };
 
             return View(model);
         }
 
+        //POST: Guardar cambios
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<ActionResult> EditRoles(EditRolesViewModel model)
+        public ActionResult EditRoles(EditRolesViewModel model)
         {
-            if (!ModelState.IsValid) return View(model);
-
-            var user = await userManager.FindByIdAsync(model.UserId);
+            var user = db.Users.Find(model.UserId);
             if (user == null) return HttpNotFound();
 
-            var userRoles = await userManager.GetRolesAsync(user.Id);
+            var currentRoles = userManager.GetRoles(user.Id).ToList();
 
-            // Remover roles existentes
-            await userManager.RemoveFromRolesAsync(user.Id, userRoles.ToArray());
-
-            if (model.SelectedRoles != null)
+            // Quitar todos los roles actuales
+            foreach (var role in currentRoles)
             {
-                await userManager.AddToRolesAsync(user.Id, model.SelectedRoles);
+                userManager.RemoveFromRole(user.Id, role);
             }
 
-            return RedirectToAction("Users");
+            // Agregar el nuevo rol seleccionado
+            if (!string.IsNullOrEmpty(model.SelectedRole))
+            {
+                userManager.AddToRole(user.Id, model.SelectedRole);
+            }
+
+            return RedirectToAction("ListUsers");
         }
+
     }
 }

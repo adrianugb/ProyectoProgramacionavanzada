@@ -15,9 +15,33 @@ namespace ProyectoFinal_G1_Autenticado.Controllers
         [AllowAnonymous]
         public ActionResult Index()
         {
-            var products = db.Products.Include(p => p.Images).ToList();
-            return View(products);
+            var products = db.Products.Include(p => p.Images).AsQueryable();
+
+            if (!User.IsInRole("Administrador"))
+            {
+                products = products.Where(p => p.Status == ProductStatus.Activo);
+            }
+
+            return View(products.ToList());
         }
+
+        [Authorize(Roles = "Administrador")]
+        public ActionResult ToggleStatus(int id)
+        {
+            var product = db.Products.Find(id);
+            if (product == null)
+                return HttpNotFound();
+
+            // Cambiar estado
+            product.Status = product.Status == ProductStatus.Activo
+                ? ProductStatus.Inactivo
+                : ProductStatus.Activo;
+
+            db.SaveChanges();
+
+            return RedirectToAction("Index");
+        }
+
 
         // GET: Products/Details/5
         [AllowAnonymous]
