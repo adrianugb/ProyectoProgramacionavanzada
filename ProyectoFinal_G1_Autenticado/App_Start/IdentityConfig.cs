@@ -40,9 +40,10 @@ namespace ProyectoFinal_G1_Autenticado
         {
         }
 
-        public static ApplicationUserManager Create(IdentityFactoryOptions<ApplicationUserManager> options, IOwinContext context) 
+        public static ApplicationUserManager Create(IdentityFactoryOptions<ApplicationUserManager> options, IOwinContext context)
         {
             var manager = new ApplicationUserManager(new UserStore<ApplicationUser>(context.Get<ApplicationDbContext>()));
+
             // Configure la lógica de validación de nombres de usuario
             manager.UserValidator = new UserValidator<ApplicationUser>(manager)
             {
@@ -60,10 +61,10 @@ namespace ProyectoFinal_G1_Autenticado
                 RequireUppercase = true,
             };
 
-            // Configurar valores predeterminados para bloqueo de usuario
-            manager.UserLockoutEnabledByDefault = true;
-            manager.DefaultAccountLockoutTimeSpan = TimeSpan.FromMinutes(5);
-            manager.MaxFailedAccessAttemptsBeforeLockout = 5;
+            // ⬇️ Configurar valores predeterminados para bloqueo de usuario (historia de usuario)
+            manager.UserLockoutEnabledByDefault = true;                        // Habilitar bloqueo
+            manager.DefaultAccountLockoutTimeSpan = TimeSpan.FromMinutes(15);  // Bloqueo 15 minutos
+            manager.MaxFailedAccessAttemptsBeforeLockout = 3;                  // Máximo 3 intentos fallidos
 
             // Registre los proveedores de autenticación de dos factores. Esta aplicación usa el teléfono y el correo electrónico para recibir un código de verificación del usuario
             // Puede escribir su propio proveedor y conectarlo aquí.
@@ -81,7 +82,7 @@ namespace ProyectoFinal_G1_Autenticado
             var dataProtectionProvider = options.DataProtectionProvider;
             if (dataProtectionProvider != null)
             {
-                manager.UserTokenProvider = 
+                manager.UserTokenProvider =
                     new DataProtectorTokenProvider<ApplicationUser>(dataProtectionProvider.Create("ASP.NET Identity"));
             }
             return manager;
