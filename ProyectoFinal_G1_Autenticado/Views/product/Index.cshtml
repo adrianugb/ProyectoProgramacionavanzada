@@ -1,10 +1,16 @@
 ﻿@model IEnumerable<ProyectoFinal_G1_Autenticado.Models.Product>
+
 @{
     ViewBag.Title = "Catálogo de Productos";
 
     var productosMostrar = User.IsInRole("Administrador")
         ? Model
         : Model.Where(p => p.Status == ProyectoFinal_G1_Autenticado.Models.ProductStatus.Activo);
+
+    var searchName = ViewBag.SearchName as string;
+    decimal? minPrice = ViewBag.MinPrice as decimal?;
+    decimal? maxPrice = ViewBag.MaxPrice as decimal?;
+    bool onlyAvailable = ViewBag.OnlyAvailable != null && (bool)ViewBag.OnlyAvailable;
 }
 
 <h2>Catálogo de Productos</h2>
@@ -15,6 +21,57 @@
         @Html.ActionLink("Crear Producto", "Create", null, new { @class = "btn btn-primary" })
     }
 </p>
+
+<!-- Filtros de búsqueda -->
+<div class="panel panel-default">
+    <div class="panel-heading">
+        <strong>Buscar y filtrar productos</strong>
+    </div>
+    <div class="panel-body">
+        @using (Html.BeginForm("Index", "Product", FormMethod.Get))
+        {
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="form-group">
+                        @Html.Label("Nombre")
+                        @Html.TextBox("searchName", searchName, new { @class = "form-control", placeholder = "Buscar por nombre..." })
+                    </div>
+                </div>
+
+                <div class="col-md-2">
+                    <div class="form-group">
+                        @Html.Label("Precio mínimo")
+                        @Html.TextBox("minPrice", minPrice.HasValue ? minPrice.Value.ToString("0.##") : "",
+                            new { @class = "form-control", type = "number", step = "0.01", min = "0" })
+                    </div>
+                </div>
+
+                <div class="col-md-2">
+                    <div class="form-group">
+                        @Html.Label("Precio máximo")
+                        @Html.TextBox("maxPrice", maxPrice.HasValue ? maxPrice.Value.ToString("0.##") : "",
+                            new { @class = "form-control", type = "number", step = "0.01", min = "0" })
+                    </div>
+                </div>
+
+                <div class="col-md-2">
+                    <div class="checkbox" style="margin-top:25px;">
+                        <label>
+                            <input type="checkbox" name="onlyAvailable" value="true" @(onlyAvailable ? "checked=\"checked\"" : "") />
+                            Solo disponibles (con stock)
+                        </label>
+                    </div>
+                </div>
+
+                <div class="col-md-2" style="margin-top:25px;">
+                    <button type="submit" class="btn btn-primary btn-block">
+                        Buscar
+                    </button>
+                </div>
+            </div>
+        }
+    </div>
+</div>
 
 <table class="table table-striped">
     <thead>
@@ -53,7 +110,7 @@
                         <a class="btn btn-sm btn-warning" href="@Url.Action("Edit", new { id = item.Id })">Editar</a>
                         <a class="btn btn-sm btn-danger" href="@Url.Action("Delete", new { id = item.Id })">Eliminar</a>
                         <a class="btn btn-sm btn-secondary" href="@Url.Action("ToggleStatus", new { id = item.Id })">
-                            @(item.Status == ProyectoFinal_G1_Autenticado.Models.ProductStatus.Activo? "Inactivar": "Activar")
+                            @(item.Status == ProyectoFinal_G1_Autenticado.Models.ProductStatus.Activo ? "Inactivar" : "Activar")
                         </a>
                     }
                 </td>

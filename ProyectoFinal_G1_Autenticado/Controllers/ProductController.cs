@@ -13,17 +13,49 @@ namespace ProyectoFinal_G1_Autenticado.Controllers
 
         // GET: Products
         [AllowAnonymous]
-        public ActionResult Index()
+        public ActionResult Index(string searchName, decimal? minPrice, decimal? maxPrice, bool? onlyAvailable)
         {
             var products = db.Products.Include(p => p.Images).AsQueryable();
 
+            // Si NO es administrador, solo productos Activos
             if (!User.IsInRole("Administrador"))
             {
                 products = products.Where(p => p.Status == ProductStatus.Activo);
             }
 
+            // Buscar por nombre
+            if (!string.IsNullOrWhiteSpace(searchName))
+            {
+                products = products.Where(p => p.Name.Contains(searchName));
+            }
+
+            // Filtro por precio mínimo
+            if (minPrice.HasValue)
+            {
+                products = products.Where(p => p.Price >= minPrice.Value);
+            }
+
+            // Filtro por precio máximo
+            if (maxPrice.HasValue)
+            {
+                products = products.Where(p => p.Price <= maxPrice.Value);
+            }
+
+            // Filtro por disponibilidad (stock > 0)
+            if (onlyAvailable == true)
+            {
+                products = products.Where(p => p.Stock > 0);
+            }
+
+            // Para recordar los valores en el formulario
+            ViewBag.SearchName = searchName;
+            ViewBag.MinPrice = minPrice;
+            ViewBag.MaxPrice = maxPrice;
+            ViewBag.OnlyAvailable = onlyAvailable ?? false;
+
             return View(products.ToList());
         }
+
 
         [Authorize(Roles = "Administrador")]
         public ActionResult ToggleStatus(int id)
