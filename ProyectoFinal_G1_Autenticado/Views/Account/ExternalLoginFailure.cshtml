@@ -1,10 +1,25 @@
 ﻿@{
-    ViewBag.Title = "Error de inicio de sesión";
+    ViewBag.Title = "Error de Inicio de Sesión";
 }
 
-<main>
-    <hgroup>
-        <h2>@ViewBag.Title.</h2>
-        <h3 class="text-danger">El inicio de sesión con el servicio no se ha llevado a cabo correctamente.</h3>
-    </hgroup>
+<main aria-labelledby="title" class="mensaje-error">
+    <div class="icono-error">
+        <svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"></circle>
+            <line x1="15" y1="9" x2="9" y2="15"></line>
+            <line x1="9" y1="9" x2="15" y2="15"></line>
+        </svg>
+    </div>
+    <h2 id="title">Error de Inicio de Sesión</h2>
+    <div class="mensaje-contenido">
+        <p class="text-danger">
+            El inicio de sesión con el servicio externo no se completó correctamente.
+        </p>
+        <p>
+            Por favor, intenta nuevamente o usa otro método de inicio de sesión.
+        </p>
+    </div>
+    <div class="form-group">
+        @Html.ActionLink("Volver a Intentar", "Login", "Account", null, new { @class = "btn-principal" })
+    </div>
 </main>

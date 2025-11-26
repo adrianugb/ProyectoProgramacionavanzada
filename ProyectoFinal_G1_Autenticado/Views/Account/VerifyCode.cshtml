@@ -1,36 +1,45 @@
 ﻿@model ProyectoFinal_G1_Autenticado.Models.VerifyCodeViewModel
 @{
-    ViewBag.Title = "Verificar";
+    ViewBag.Title = "Verificación";
 }
 
 <main aria-labelledby="title">
-    <h2 id="title">@ViewBag.Title.</h2>
+    <h2 id="title">Verificación en Dos Pasos</h2>
+    <h4>Ingresa el código de seguridad</h4>
+    <hr />
 
-    @using (Html.BeginForm("VerifyCode", "Account", new { ReturnUrl = Model.ReturnUrl }, FormMethod.Post, new { role = "form" })) {
+    @using (Html.BeginForm("VerifyCode", "Account", new { ReturnUrl = Model.ReturnUrl }, FormMethod.Post, new { role = "form", @class = "form-verify" }))
+    {
         @Html.AntiForgeryToken()
         @Html.Hidden("provider", @Model.Provider)
         @Html.Hidden("rememberMe", @Model.RememberMe)
-        <h4>Escribir el código de verificación</h4>
-        <hr />
-        @Html.ValidationSummary("", new { @class = "text-danger" })
-        <div class="row">
-            @Html.LabelFor(m => m.Code, new { @class = "col-md-2 col-form-label" })
-            <div class="col-md-10">
-                @Html.TextBoxFor(m => m.Code, new { @class = "form-control" })
-            </div>
+        @Html.ValidationSummary("", new { @class = "validation-summary-errors" })
+
+        <div class="info-box">
+            <p>Se ha enviado un código de verificación a tu dispositivo. Ingrésalo a continuación.</p>
         </div>
-        <div class="row">
-            <div class="offset-md-2 col-md-10">
-                <div class="checkbox">
-                    @Html.CheckBoxFor(m => m.RememberBrowser)
-                    @Html.LabelFor(m => m.RememberBrowser)
-                </div>
-            </div>
+
+        <div class="form-group">
+            @Html.LabelFor(m => m.Code, "Código de Verificación", new { @class = "form-label" })
+            @Html.TextBoxFor(m => m.Code, new
+            {
+                @class = "form-control",
+                placeholder = "000000",
+                autocomplete = "one-time-code",
+                maxlength = "6"
+            })
+            @Html.ValidationMessageFor(m => m.Code, "", new { @class = "text-danger" })
         </div>
-        <div class="row">
-            <div class="offset-md-2 col-md-10">
-                <input type="submit" class="btn btn-outline-dark" value="Enviar" />
-            </div>
+
+        <div class="form-group-checkbox">
+            <label class="checkbox-custom">
+                @Html.CheckBoxFor(m => m.RememberBrowser)
+                <span class="checkbox-label">Recordar este navegador</span>
+            </label>
+        </div>
+
+        <div class="form-group">
+            <input type="submit" class="btn-principal" value="Verificar" />
         </div>
     }
 </main>

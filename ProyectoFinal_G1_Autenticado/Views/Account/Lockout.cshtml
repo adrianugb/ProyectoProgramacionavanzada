@@ -1,11 +1,25 @@
 ﻿@{
-    ViewBag.Title = "Cuenta bloqueada";
+    ViewBag.Title = "Cuenta Bloqueada";
 }
 
-<h2>Cuenta bloqueada</h2>
-<p>
-    Tu cuenta ha sido bloqueada temporalmente debido a múltiples intentos fallidos de inicio de sesión.
-</p>
-<p>
-    Por seguridad, deberás esperar 15 minutos antes de intentar nuevamente.
-</p>
+<main aria-labelledby="title" class="mensaje-error">
+    <div class="icono-error">
+        <svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"></circle>
+            <line x1="12" y1="8" x2="12" y2="12"></line>
+            <line x1="12" y1="16" x2="12.01" y2="16"></line>
+        </svg>
+    </div>
+    <h2 id="title">Cuenta Bloqueada Temporalmente</h2>
+    <div class="mensaje-contenido">
+        <p>
+            Tu cuenta ha sido bloqueada debido a múltiples intentos fallidos de inicio de sesión.
+        </p>
+        <p>
+            Por seguridad, deberás esperar <strong>15 minutos</strong> antes de intentar nuevamente.
+        </p>
+    </div>
+    <div class="link-secundario">
+        <p>@Html.ActionLink("¿Necesitas ayuda?", "ForgotPassword", "Account")</p>
+    </div>
+</main>

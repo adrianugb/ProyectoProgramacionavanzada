@@ -1,11 +1,21 @@
 ﻿@{
-    ViewBag.Title = "Confirmar correo electrónico";
+    ViewBag.Title = "Correo Confirmado";
 }
-<main aria-labelledby="title">
-    <h2 id="title">@ViewBag.Title.</h2>
-    <div>
+
+<main aria-labelledby="title" class="mensaje-exito">
+    <div class="icono-exito">
+        <svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+            <polyline points="22 4 12 14.01 9 11.01"></polyline>
+        </svg>
+    </div>
+    <h2 id="title">¡Correo Confirmado!</h2>
+    <div class="mensaje-contenido">
         <p>
-            Gracias por confirmar su correo electrónico. @Html.ActionLink("Haga clic aquí para iniciar sesión", "Login", "Account", routeValues: null, htmlAttributes: new { id = "loginLink" })
+            Gracias por confirmar tu correo electrónico. Ya puedes iniciar sesión.
         </p>
+    </div>
+    <div class="form-group">
+        @Html.ActionLink("Iniciar Sesión", "Login", "Account", null, new { @class = "btn-principal" })
     </div>
 </main>
