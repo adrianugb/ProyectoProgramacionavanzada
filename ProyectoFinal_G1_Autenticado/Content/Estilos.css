@@ -28,8 +28,6 @@ textarea.form-control {
 }
 
 
-
-    /* Separación entre el input y el siguiente label */
     .form-group .form-control {
         margin-bottom: 8px;
     }
