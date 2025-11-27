@@ -29,13 +29,13 @@ namespace ProyectoFinal_G1_Autenticado.Controllers
                 products = products.Where(p => p.Name.Contains(searchName));
             }
 
-            // Filtro por precio mínimo
+            // Filtro por precio minimo
             if (minPrice.HasValue)
             {
                 products = products.Where(p => p.Price >= minPrice.Value);
             }
 
-            // Filtro por precio máximo
+            // Filtro por precio maximo
             if (maxPrice.HasValue)
             {
                 products = products.Where(p => p.Price <= maxPrice.Value);

@@ -18,6 +18,11 @@ namespace ProyectoFinal_G1_Autenticado.Identity
                     var role = new IdentityRole("Administrador");
                     roleManager.Create(role);
                 }
+                if (!roleManager.RoleExists("Asociado"))
+                {
+                    var role = new IdentityRole("Asociado");
+                    roleManager.Create(role);
+                }
 
                 string adminEmail = "admin@tudominio.com";
                 string adminPassword = "Admin123!";
