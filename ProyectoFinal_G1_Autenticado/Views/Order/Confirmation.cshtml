@@ -1,0 +1,54 @@
+@model ProyectoFinal_G1_Autenticado.Models.Order
+@{
+    ViewBag.Title = "Compra Exitosa";
+}
+
+<div class="text-center mb-4">
+    <h1 class="text-success">¡Compra Realizada con Éxito!</h1>
+    <p class="lead">Tu pedido ha sido procesado correctamente.</p>
+</div>
+
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header bg-success text-white">
+                <h5>Resumen del Pedido #@Model.Id</h5>
+            </div>
+            <div class="card-body">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Producto</th>
+                            <th>Cantidad</th>
+                            <th>Precio</th>
+                            <th>Subtotal</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var detail in Model.Details)
+                        {
+                            <tr>
+                                <td>@detail.Product.Name</td>
+                                <td>@detail.Quantity</td>
+                                <td>@String.Format("{0:C}", detail.UnitPrice)</td>
+                                <td>@String.Format("{0:C}", detail.UnitPrice * detail.Quantity)</td>
+                            </tr>
+                        }
+                    </tbody>
+                    <tfoot>
+                        <tr class="table-success">
+                            <td colspan="3" class="text-end"><strong>Total Pagado:</strong></td>
+                            <td><strong>@String.Format("{0:C}", Model.Total)</strong></td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+        </div>
+
+        <div class="text-center mt-4">
+            @Html.ActionLink("Ver Mis Pedidos", "Index", "Order", null, new { @class = "btn btn-primary" })
+            @Html.ActionLink("Seguir Comprando", "Index", "Product", null, new { @class = "btn btn-success" })
+        </div>
+    </div>
+</div>
+

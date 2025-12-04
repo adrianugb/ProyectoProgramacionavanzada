@@ -24,6 +24,11 @@
                 <ul class="navbar-nav flex-grow-1">
 
                     <li>@Html.ActionLink("Producto", "Index", "Product", new { area = "" }, new { @class = "nav-link" })</li>
+                    @if (User.IsInRole("Asociado"))
+                    {
+                        <li>@Html.ActionLink("Mi Carrito", "Index", "Cart", null, new { @class = "nav-link" })</li>
+                        <li>@Html.ActionLink("Mis Pedidos", "Index", "Order", null, new { @class = "nav-link" })</li>
+                    }
                     @if (User.IsInRole("Administrador"))
                     {
                         <li> @Html.ActionLink("Cambio de Roles", "ListUsers", "Admin", null, new { @class = "nav-link" })</li>

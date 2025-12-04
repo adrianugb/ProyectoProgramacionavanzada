@@ -1,17 +1,16 @@
-﻿@model List<ProyectoFinal_G1_Autenticado.Models.EditRolesViewModel>
-
+﻿@model IEnumerable<ProyectoFinal_G1_Autenticado.Models.EditRolesViewModel>
 @{
     ViewBag.Title = "Lista de Usuarios";
 }
 
-<h2>Gestión de Roles</h2>
+<h2>Lista de Usuarios</h2>
 
-<table class="table table-bordered table-striped">
+<table class="table table-striped">
     <thead>
         <tr>
             <th>Email</th>
-            <th>Roles Actuales</th>
-            <th>Acción</th>
+            <th>Rol actual</th>
+            <th></th>
         </tr>
     </thead>
     <tbody>
@@ -19,20 +18,9 @@
         {
             <tr>
                 <td>@user.Email</td>
+                <td>@(user.SelectedRole ?? "Sin rol")</td>
                 <td>
-                    @if (!string.IsNullOrEmpty(user.SelectedRole))
-                    {
-                        @user.SelectedRole
-                    }
-                    else
-                    {
-                        <span class="text-muted">Sin rol</span>
-                    }
-                </td>
-                <td>
-                    @Html.ActionLink("Editar Roles", "EditRoles", "Admin",
-                        new { id = user.UserId },
-                        new { @class = "btn btn-primary btn-sm" })
+                    @Html.ActionLink("Editar Rol", "EditRoles", new { id = user.UserId }, new { @class = "btn btn-sm btn-primary" })
                 </td>
             </tr>
         }

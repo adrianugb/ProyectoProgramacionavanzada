@@ -1,0 +1,59 @@
+@model IEnumerable<ProyectoFinal_G1_Autenticado.Models.Order>
+@{
+    ViewBag.Title = "Mis Pedidos";
+}
+
+<h2>Historial de Pedidos</h2>
+
+@if (Model.Any())
+{
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>N° Orden</th>
+                <th>Fecha</th>
+                <th>Total</th>
+                <th>Estado</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var order in Model)
+            {
+                <tr>
+                    <td><strong>#@order.Id</strong></td>
+                    <td>@order.OrderDate.ToString("dd/MM/yyyy HH:mm")</td>
+                    <td>@String.Format("{0:C}", order.Total)</td>
+                    <td>
+                        @switch (order.Status)
+                        {
+                            case ProyectoFinal_G1_Autenticado.Models.OrderStatus.Pendiente:
+                                <span class="badge bg-warning">Pendiente</span>
+                                break;
+                            case ProyectoFinal_G1_Autenticado.Models.OrderStatus.Procesando:
+                                <span class="badge bg-info">Procesando</span>
+                                break;
+                            case ProyectoFinal_G1_Autenticado.Models.OrderStatus.Completada:
+                                <span class="badge bg-success">Completada</span>
+                                break;
+                            case ProyectoFinal_G1_Autenticado.Models.OrderStatus.Cancelada:
+                                <span class="badge bg-danger">Cancelada</span>
+                                break;
+                        }
+                    </td>
+                    <td>
+                        @Html.ActionLink("Ver Detalles", "Details", new { id = order.Id }, new { @class = "btn btn-sm btn-outline-primary" })
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+else
+{
+    <div class="alert alert-info">
+        <p>No tienes pedidos aún.</p>
+        @Html.ActionLink("Ir a Comprar", "Index", "Product", null, new { @class = "btn btn-primary" })
+    </div>
+}
+

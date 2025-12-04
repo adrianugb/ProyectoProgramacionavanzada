@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNet.Identity;
+using Microsoft.AspNet.Identity.EntityFramework;
 using Microsoft.AspNet.Identity.Owin;
 using Microsoft.Owin.Security;
 using ProyectoFinal_G1_Autenticado.Models;
@@ -79,6 +80,12 @@ namespace ProyectoFinal_G1_Autenticado.Controllers
             switch (result)
             {
                 case SignInStatus.Success:
+                    var user = await UserManager.FindByNameAsync(model.Email);
+                    if (user != null)
+                    {
+                        user.LastLoginDate = System.DateTime.Now;
+                        await UserManager.UpdateAsync(user);
+                    }
                     return RedirectToLocal(returnUrl);
 
                 case SignInStatus.LockedOut:
@@ -153,10 +160,22 @@ namespace ProyectoFinal_G1_Autenticado.Controllers
         {
             if (ModelState.IsValid)
             {
-                var user = new ApplicationUser { UserName = model.Email, Email = model.Email };
+                var user = new ApplicationUser 
+                { 
+                    UserName = model.Email, 
+                    Email = model.Email,
+                    IsActive = true,
+                    LastLoginDate = System.DateTime.Now
+                };
                 var result = await UserManager.CreateAsync(user, model.Password);
                 if (result.Succeeded)
                 {
+                    var roleManager = new RoleManager<IdentityRole>(new RoleStore<IdentityRole>(new ApplicationDbContext()));
+                    if (!roleManager.RoleExists("Asociado"))
+                    {
+                        roleManager.Create(new IdentityRole("Asociado"));
+                    }
+                    await UserManager.AddToRoleAsync(user.Id, "Asociado");
                     await SignInManager.SignInAsync(user, isPersistent: false, rememberBrowser: false);
 
                     return RedirectToAction("Index", "Home");

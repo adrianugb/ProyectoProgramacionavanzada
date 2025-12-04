@@ -11,6 +11,7 @@ namespace ProyectoFinal_G1_Autenticado.Models
     {
         public string FullName { get; set; }
         public bool IsActive { get; set; }
+        public DateTime? LastLoginDate { get; set; }
 
         public async Task<ClaimsIdentity> GenerateUserIdentityAsync(UserManager<ApplicationUser> manager)
         {
