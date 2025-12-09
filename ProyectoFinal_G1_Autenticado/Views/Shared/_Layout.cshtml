@@ -26,7 +26,11 @@
                     <li>@Html.ActionLink("Producto", "Index", "Product", new { area = "" }, new { @class = "nav-link" })</li>
                     @if (User.IsInRole("Asociado"))
                     {
-                        <li>@Html.ActionLink("Mi Carrito", "Index", "Cart", null, new { @class = "nav-link" })</li>
+                        <li>
+                            <a href="@Url.Action("Index", "Cart")" class="nav-link">
+                                Mi Carrito <span class="badge bg-danger" id="cartCount" style="display:none;">0</span>
+                            </a>
+                        </li>
                         <li>@Html.ActionLink("Mis Pedidos", "Index", "Order", null, new { @class = "nav-link" })</li>
                     }
                     @if (User.IsInRole("Administrador"))
@@ -51,6 +55,24 @@
 
     @Scripts.Render("~/bundles/jquery")
     @Scripts.Render("~/bundles/bootstrap")
+    @if (User.IsInRole("Asociado"))
+    {
+        <script>
+            $(document).ready(function () {
+                updateCartCount();
+            });
+
+            function updateCartCount() {
+                $.get('/api/cart/count', function (data) {
+                    if (data.count > 0) {
+                        $('#cartCount').text(data.count).show();
+                    } else {
+                        $('#cartCount').hide();
+                    }
+                });
+            }
+        </script>
+    }
     @RenderSection("scripts", required: false)
 </body>
 </html>

@@ -1,28 +1,25 @@
 using System;
 using System.Collections.Generic;
-using System.Data.Entity;
 using System.Linq;
 using System.Web.Mvc;
 using Microsoft.AspNet.Identity;
 using ProyectoFinal_G1_Autenticado.Models;
+using ProyectoFinal_G1_Autenticado.Repositories;
 
 namespace ProyectoFinal_G1_Autenticado.Controllers
 {
     [Authorize]
     public class OrderController : Controller
     {
-        private ApplicationDbContext db = new ApplicationDbContext();
+        private IOrderRepository orderRepo = new OrderRepository();
+        private ICartItemRepository cartRepo = new CartItemRepository();
+        private IProductRepository productRepo = new ProductRepository();
 
         [Authorize(Roles = "Asociado")]
         public ActionResult Index()
         {
             var userId = User.Identity.GetUserId();
-            var orders = db.Orders
-                .Include(o => o.Details)
-                .Include(o => o.Details.Select(d => d.Product))
-                .Where(o => o.UserId == userId)
-                .OrderByDescending(o => o.OrderDate)
-                .ToList();
+            var orders = orderRepo.GetByUserId(userId).ToList();
 
             return View(orders);
         }
@@ -31,12 +28,9 @@ namespace ProyectoFinal_G1_Autenticado.Controllers
         public ActionResult Details(int id)
         {
             var userId = User.Identity.GetUserId();
-            var order = db.Orders
-                .Include(o => o.Details)
-                .Include(o => o.Details.Select(d => d.Product))
-                .FirstOrDefault(o => o.Id == id && o.UserId == userId);
+            var order = orderRepo.GetWithDetails(id);
 
-            if (order == null)
+            if (order == null || order.UserId != userId)
                 return HttpNotFound();
 
             return View(order);
@@ -48,10 +42,7 @@ namespace ProyectoFinal_G1_Autenticado.Controllers
         public ActionResult ConfirmPurchase()
         {
             var userId = User.Identity.GetUserId();
-            var cartItems = db.CartItems
-                .Include(c => c.Product)
-                .Where(c => c.UserId == userId)
-                .ToList();
+            var cartItems = cartRepo.GetByUserId(userId).ToList();
 
             if (!cartItems.Any())
             {
@@ -62,7 +53,7 @@ namespace ProyectoFinal_G1_Autenticado.Controllers
             var errors = new List<string>();
             foreach (var item in cartItems)
             {
-                var product = db.Products.Find(item.ProductId);
+                var product = productRepo.GetById(item.ProductId);
                 if (product.Stock < item.Quantity)
                 {
                     errors.Add($"'{product.Name}' solo tiene {product.Stock} unidades disponibles.");
@@ -91,7 +82,7 @@ namespace ProyectoFinal_G1_Autenticado.Controllers
 
             foreach (var item in cartItems)
             {
-                var product = db.Products.Find(item.ProductId);
+                var product = productRepo.GetById(item.ProductId);
 
                 var detail = new OrderDetail
                 {
@@ -104,18 +95,19 @@ namespace ProyectoFinal_G1_Autenticado.Controllers
                 total += detail.Quantity * detail.UnitPrice;
 
                 product.Stock -= item.Quantity;
+                productRepo.Update(product);
             }
 
             order.Total = total;
-            db.Orders.Add(order);
+            orderRepo.Add(order);
+            orderRepo.Save();
 
-            var itemsToRemove = db.CartItems.Where(c => c.UserId == userId).ToList();
-            foreach (var item in itemsToRemove)
+            // Limpiar carrito
+            foreach (var item in cartItems)
             {
-                db.CartItems.Remove(item);
+                cartRepo.Delete(item);
             }
-
-            db.SaveChanges();
+            cartRepo.Save();
 
             return RedirectToAction("Confirmation", new { id = order.Id });
         }
@@ -124,12 +116,9 @@ namespace ProyectoFinal_G1_Autenticado.Controllers
         public ActionResult Confirmation(int id)
         {
             var userId = User.Identity.GetUserId();
-            var order = db.Orders
-                .Include(o => o.Details)
-                .Include(o => o.Details.Select(d => d.Product))
-                .FirstOrDefault(o => o.Id == id && o.UserId == userId);
+            var order = orderRepo.GetWithDetails(id);
 
-            if (order == null)
+            if (order == null || order.UserId != userId)
                 return HttpNotFound();
 
             return View(order);
@@ -137,9 +126,13 @@ namespace ProyectoFinal_G1_Autenticado.Controllers
 
         protected override void Dispose(bool disposing)
         {
-            if (disposing) db.Dispose();
+            if (disposing)
+            {
+                (orderRepo as IDisposable)?.Dispose();
+                (cartRepo as IDisposable)?.Dispose();
+                (productRepo as IDisposable)?.Dispose();
+            }
             base.Dispose(disposing);
         }
     }
 }
-

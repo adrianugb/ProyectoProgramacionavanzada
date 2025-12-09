@@ -13,7 +13,11 @@ namespace ProyectoFinal_G1_Autenticado.Repositories
 
         public IEnumerable<CartItem> GetByUserId(string userId)
         {
-            return _dbSet.Include(c => c.Product).Where(c => c.UserId == userId).ToList();
+            return _dbSet
+                .Include(c => c.Product)
+                .Include(c => c.Product.Images)
+                .Where(c => c.UserId == userId)
+                .ToList();
         }
 
         public CartItem GetByUserAndProduct(string userId, int productId)

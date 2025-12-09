@@ -50,10 +50,12 @@
             <div class="card-body text-center">
                 <h2>@String.Format("{0:C}", ViewBag.CartTotal)</h2>
                 <hr />
-                @using (Html.BeginForm("ConfirmPurchase", "Order", FormMethod.Post))
+                @using (Html.BeginForm("ConfirmPurchase", "Order", FormMethod.Post, new { id = "formCheckout" }))
                 {
                     @Html.AntiForgeryToken()
-                    <button type="submit" class="btn btn-success btn-lg w-100">Confirmar Compra</button>
+                    <button type="button" class="btn btn-success btn-lg w-100" data-bs-toggle="modal" data-bs-target="#confirmModal">
+                        Confirmar Compra
+                    </button>
                 }
                 <div class="mt-3">
                     @Html.ActionLink("Volver al Carrito", "Index", "Cart", null, new { @class = "btn btn-outline-secondary" })
@@ -63,3 +65,34 @@
     </div>
 </div>
 
+<!-- Modal de confirmación de compra -->
+<div class="modal fade" id="confirmModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-success text-white">
+                <h5 class="modal-title">Confirmar Compra</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>¿Estás seguro de realizar esta compra por <strong>@String.Format("{0:C}", ViewBag.CartTotal)</strong>?</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-success" id="btnConfirmPurchase">
+                    <span class="spinner-border spinner-border-sm me-1" id="spinnerPurchase" style="display:none;"></span>
+                    Confirmar
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section scripts {
+    <script>
+        $('#btnConfirmPurchase').click(function () {
+            $(this).prop('disabled', true);
+            $('#spinnerPurchase').show();
+            $('#formCheckout').submit();
+        });
+    </script>
+}

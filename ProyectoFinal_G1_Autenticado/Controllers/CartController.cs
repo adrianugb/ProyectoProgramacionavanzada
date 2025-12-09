@@ -1,26 +1,23 @@
 using System;
 using System.Collections.Generic;
-using System.Data.Entity;
 using System.Linq;
 using System.Web.Mvc;
 using Microsoft.AspNet.Identity;
 using ProyectoFinal_G1_Autenticado.Models;
+using ProyectoFinal_G1_Autenticado.Repositories;
 
 namespace ProyectoFinal_G1_Autenticado.Controllers
 {
     [Authorize(Roles = "Asociado")]
     public class CartController : Controller
     {
-        private ApplicationDbContext db = new ApplicationDbContext();
+        private ICartItemRepository cartRepo = new CartItemRepository();
+        private IProductRepository productRepo = new ProductRepository();
 
         public ActionResult Index()
         {
             var userId = User.Identity.GetUserId();
-            var items = db.CartItems
-                .Include(c => c.Product)
-                .Include(c => c.Product.Images)
-                .Where(c => c.UserId == userId)
-                .ToList();
+            var items = cartRepo.GetByUserId(userId).ToList();
 
             ViewBag.CartTotal = items.Sum(i => i.Product.Price * i.Quantity);
             return View(items);
@@ -31,19 +28,20 @@ namespace ProyectoFinal_G1_Autenticado.Controllers
         public ActionResult UpdateQuantity(int productId, int quantity)
         {
             var userId = User.Identity.GetUserId();
-            var item = db.CartItems.FirstOrDefault(c => c.UserId == userId && c.ProductId == productId);
+            var item = cartRepo.GetByUserAndProduct(userId, productId);
 
             if (item != null)
             {
                 if (quantity <= 0)
                 {
-                    db.CartItems.Remove(item);
+                    cartRepo.Delete(item);
                 }
                 else
                 {
                     item.Quantity = quantity;
+                    cartRepo.Update(item);
                 }
-                db.SaveChanges();
+                cartRepo.Save();
             }
 
             return RedirectToAction("Index");
@@ -54,12 +52,12 @@ namespace ProyectoFinal_G1_Autenticado.Controllers
         public ActionResult RemoveItem(int productId)
         {
             var userId = User.Identity.GetUserId();
-            var item = db.CartItems.FirstOrDefault(c => c.UserId == userId && c.ProductId == productId);
+            var item = cartRepo.GetByUserAndProduct(userId, productId);
 
             if (item != null)
             {
-                db.CartItems.Remove(item);
-                db.SaveChanges();
+                cartRepo.Delete(item);
+                cartRepo.Save();
             }
 
             return RedirectToAction("Index");
@@ -68,10 +66,7 @@ namespace ProyectoFinal_G1_Autenticado.Controllers
         public ActionResult Checkout()
         {
             var userId = User.Identity.GetUserId();
-            var items = db.CartItems
-                .Include(c => c.Product)
-                .Where(c => c.UserId == userId)
-                .ToList();
+            var items = cartRepo.GetByUserId(userId).ToList();
 
             if (!items.Any())
             {
@@ -103,9 +98,12 @@ namespace ProyectoFinal_G1_Autenticado.Controllers
 
         protected override void Dispose(bool disposing)
         {
-            if (disposing) db.Dispose();
+            if (disposing)
+            {
+                (cartRepo as IDisposable)?.Dispose();
+                (productRepo as IDisposable)?.Dispose();
+            }
             base.Dispose(disposing);
         }
     }
 }
-

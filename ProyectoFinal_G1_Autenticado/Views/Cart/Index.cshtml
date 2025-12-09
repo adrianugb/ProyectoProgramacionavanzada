@@ -40,23 +40,28 @@
                     </td>
                     <td>@String.Format("{0:C}", item.Product.Price)</td>
                     <td style="width:180px;">
-                        @using (Html.BeginForm("UpdateQuantity", "Cart", FormMethod.Post, new { @class = "form-inline" }))
+                        @using (Html.BeginForm("UpdateQuantity", "Cart", FormMethod.Post, new { @class = "form-inline", onsubmit = "showSpinner(this)" }))
                         {
                             @Html.AntiForgeryToken()
                             <input type="hidden" name="productId" value="@item.ProductId" />
                             <div class="input-group">
                                 <input type="number" name="quantity" value="@item.Quantity" min="1" max="@item.Product.Stock" class="form-control" style="width:70px;" />
-                                <button type="submit" class="btn btn-sm btn-outline-primary">Actualizar</button>
+                                <button type="submit" class="btn btn-sm btn-outline-primary btn-spinner">
+                                    <span class="spinner-border spinner-border-sm me-1" style="display:none;"></span>
+                                    Actualizar
+                                </button>
                             </div>
                         }
                     </td>
                     <td>@String.Format("{0:C}", item.Product.Price * item.Quantity)</td>
                     <td>
-                        @using (Html.BeginForm("RemoveItem", "Cart", FormMethod.Post))
+                        @using (Html.BeginForm("RemoveItem", "Cart", FormMethod.Post, new { id = "formRemove_" + item.ProductId }))
                         {
                             @Html.AntiForgeryToken()
                             <input type="hidden" name="productId" value="@item.ProductId" />
-                            <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('¿Eliminar este producto?')">Eliminar</button>
+                            <button type="button" class="btn btn-sm btn-danger" onclick="showRemoveModal(@item.ProductId, '@item.Product.Name')">
+                                Eliminar
+                            </button>
                         }
                     </td>
                 </tr>
@@ -83,3 +88,51 @@ else
     </div>
 }
 
+<!-- Modal de confirmación para eliminar -->
+<div class="modal fade" id="removeModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Confirmar eliminación</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>¿Estás seguro de eliminar <strong id="productNameToRemove"></strong> del carrito?</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-danger" id="btnConfirmRemove">
+                    <span class="spinner-border spinner-border-sm me-1" id="spinnerRemove" style="display:none;"></span>
+                    Eliminar
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section scripts {
+    <script>
+        var productIdToRemove = null;
+
+        function showSpinner(form) {
+            var btn = $(form).find('.btn-spinner');
+            btn.prop('disabled', true);
+            btn.find('.spinner-border').show();
+        }
+
+        function showRemoveModal(productId, productName) {
+            productIdToRemove = productId;
+            $('#productNameToRemove').text(productName);
+            var modal = new bootstrap.Modal(document.getElementById('removeModal'));
+            modal.show();
+        }
+
+        $('#btnConfirmRemove').click(function () {
+            if (productIdToRemove) {
+                $(this).prop('disabled', true);
+                $('#spinnerRemove').show();
+                $('#formRemove_' + productIdToRemove).submit();
+            }
+        });
+    </script>
+}

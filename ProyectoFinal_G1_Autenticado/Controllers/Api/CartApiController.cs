@@ -1,9 +1,9 @@
 using System;
 using System.Linq;
 using System.Web.Http;
-using System.Data.Entity;
 using Microsoft.AspNet.Identity;
 using ProyectoFinal_G1_Autenticado.Models;
+using ProyectoFinal_G1_Autenticado.Repositories;
 
 namespace ProyectoFinal_G1_Autenticado.Controllers.Api
 {
@@ -11,7 +11,8 @@ namespace ProyectoFinal_G1_Autenticado.Controllers.Api
     [RoutePrefix("api/cart")]
     public class CartApiController : ApiController
     {
-        private ApplicationDbContext db = new ApplicationDbContext();
+        private ICartItemRepository cartRepo = new CartItemRepository();
+        private IProductRepository productRepo = new ProductRepository();
 
         [HttpPost]
         [Route("add")]
@@ -21,16 +22,16 @@ namespace ProyectoFinal_G1_Autenticado.Controllers.Api
             if (string.IsNullOrEmpty(userId))
                 return Unauthorized();
 
-            var product = db.Products.Find(request.ProductId);
+            var product = productRepo.GetById(request.ProductId);
             if (product == null || product.Status != ProductStatus.Activo)
                 return BadRequest("Producto no disponible");
 
-            var existingItem = db.CartItems
-                .FirstOrDefault(c => c.UserId == userId && c.ProductId == request.ProductId);
+            var existingItem = cartRepo.GetByUserAndProduct(userId, request.ProductId);
 
             if (existingItem != null)
             {
                 existingItem.Quantity += request.Quantity;
+                cartRepo.Update(existingItem);
             }
             else
             {
@@ -41,14 +42,12 @@ namespace ProyectoFinal_G1_Autenticado.Controllers.Api
                     Quantity = request.Quantity,
                     AddedAt = DateTime.Now
                 };
-                db.CartItems.Add(cartItem);
+                cartRepo.Add(cartItem);
             }
 
-            db.SaveChanges();
+            cartRepo.Save();
 
-            var itemCount = db.CartItems
-                .Where(c => c.UserId == userId)
-                .Sum(c => (int?)c.Quantity) ?? 0;
+            var itemCount = cartRepo.GetByUserId(userId).Sum(c => c.Quantity);
 
             return Ok(new { success = true, cartItemCount = itemCount, message = "Producto agregado al carrito" });
         }
@@ -61,31 +60,26 @@ namespace ProyectoFinal_G1_Autenticado.Controllers.Api
             if (string.IsNullOrEmpty(userId))
                 return Unauthorized();
 
-            var item = db.CartItems
-                .FirstOrDefault(c => c.UserId == userId && c.ProductId == request.ProductId);
+            var item = cartRepo.GetByUserAndProduct(userId, request.ProductId);
 
             if (item == null)
                 return NotFound();
 
             if (request.Quantity <= 0)
             {
-                db.CartItems.Remove(item);
+                cartRepo.Delete(item);
             }
             else
             {
                 item.Quantity = request.Quantity;
+                cartRepo.Update(item);
             }
 
-            db.SaveChanges();
+            cartRepo.Save();
 
-            var total = db.CartItems
-                .Include(c => c.Product)
-                .Where(c => c.UserId == userId)
-                .Sum(c => (decimal?)(c.Product.Price * c.Quantity)) ?? 0;
-
-            var itemCount = db.CartItems
-                .Where(c => c.UserId == userId)
-                .Sum(c => (int?)c.Quantity) ?? 0;
+            var items = cartRepo.GetByUserId(userId).ToList();
+            var total = items.Sum(c => c.Product.Price * c.Quantity);
+            var itemCount = items.Sum(c => c.Quantity);
 
             return Ok(new { success = true, cartTotal = total, cartItemCount = itemCount });
         }
@@ -98,23 +92,17 @@ namespace ProyectoFinal_G1_Autenticado.Controllers.Api
             if (string.IsNullOrEmpty(userId))
                 return Unauthorized();
 
-            var item = db.CartItems
-                .FirstOrDefault(c => c.UserId == userId && c.ProductId == productId);
+            var item = cartRepo.GetByUserAndProduct(userId, productId);
 
             if (item != null)
             {
-                db.CartItems.Remove(item);
-                db.SaveChanges();
+                cartRepo.Delete(item);
+                cartRepo.Save();
             }
 
-            var total = db.CartItems
-                .Include(c => c.Product)
-                .Where(c => c.UserId == userId)
-                .Sum(c => (decimal?)(c.Product.Price * c.Quantity)) ?? 0;
-
-            var itemCount = db.CartItems
-                .Where(c => c.UserId == userId)
-                .Sum(c => (int?)c.Quantity) ?? 0;
+            var items = cartRepo.GetByUserId(userId).ToList();
+            var total = items.Sum(c => c.Product.Price * c.Quantity);
+            var itemCount = items.Sum(c => c.Quantity);
 
             return Ok(new { success = true, cartTotal = total, cartItemCount = itemCount, message = "Producto eliminado" });
         }
@@ -128,16 +116,18 @@ namespace ProyectoFinal_G1_Autenticado.Controllers.Api
             if (string.IsNullOrEmpty(userId))
                 return Ok(new { count = 0 });
 
-            var count = db.CartItems
-                .Where(c => c.UserId == userId)
-                .Sum(c => (int?)c.Quantity) ?? 0;
+            var count = cartRepo.GetByUserId(userId).Sum(c => c.Quantity);
 
             return Ok(new { count = count });
         }
 
         protected override void Dispose(bool disposing)
         {
-            if (disposing) db.Dispose();
+            if (disposing)
+            {
+                (cartRepo as IDisposable)?.Dispose();
+                (productRepo as IDisposable)?.Dispose();
+            }
             base.Dispose(disposing);
         }
     }
@@ -154,4 +144,3 @@ namespace ProyectoFinal_G1_Autenticado.Controllers.Api
         public int Quantity { get; set; }
     }
 }
-

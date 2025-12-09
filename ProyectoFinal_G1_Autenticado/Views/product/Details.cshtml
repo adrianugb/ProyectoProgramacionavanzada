@@ -43,7 +43,8 @@
                         <label class="me-2">Cantidad:</label>
                         <input type="number" id="quantity" value="1" min="1" max="@Model.Stock" class="form-control me-2" style="width:80px;" />
                         <button class="btn btn-success" onclick="addToCart(@Model.Id)" id="btnAddCart">
-                            Agregar al Carrito
+                            <span class="spinner-border spinner-border-sm me-1" id="spinnerAdd" style="display:none;"></span>
+                            <span id="btnText">Agregar al Carrito</span>
                         </button>
                     </div>
                     <div id="cartMessage" class="mt-2"></div>
@@ -85,8 +86,12 @@ else
         function addToCart(productId) {
             var quantity = parseInt($('#quantity').val()) || 1;
             var btn = $('#btnAddCart');
+            var spinner = $('#spinnerAdd');
+            var btnText = $('#btnText');
             
-            btn.prop('disabled', true).text('Agregando...');
+            btn.prop('disabled', true);
+            spinner.show();
+            btnText.text('Agregando...');
 
             $.ajax({
                 url: '/api/cart/add',
@@ -95,7 +100,10 @@ else
                 data: JSON.stringify({ ProductId: productId, Quantity: quantity }),
                 success: function (data) {
                     $('#cartMessage').html('<div class="alert alert-success">' + data.message + '</div>');
-                    btn.prop('disabled', false).text('Agregar al Carrito');
+                    // Actualizar contador del navbar
+                    if (typeof updateCartCount === 'function') {
+                        updateCartCount();
+                    }
                 },
                 error: function (xhr) {
                     var msg = 'Error al agregar al carrito';
@@ -105,7 +113,11 @@ else
                         msg = xhr.responseJSON.Message;
                     }
                     $('#cartMessage').html('<div class="alert alert-danger">' + msg + '</div>');
-                    btn.prop('disabled', false).text('Agregar al Carrito');
+                },
+                complete: function () {
+                    btn.prop('disabled', false);
+                    spinner.hide();
+                    btnText.text('Agregar al Carrito');
                 }
             });
         }
