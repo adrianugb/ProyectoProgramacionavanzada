@@ -221,6 +221,16 @@
     <Compile Include="Repositories\OrderRepository.cs" />
     <Compile Include="Repositories\IOrderDetailRepository.cs" />
     <Compile Include="Repositories\OrderDetailRepository.cs" />
+    <Compile Include="Services\IProductService.cs" />
+    <Compile Include="Services\ProductService.cs" />
+    <Compile Include="Services\ICartService.cs" />
+    <Compile Include="Services\CartService.cs" />
+    <Compile Include="Services\IOrderService.cs" />
+    <Compile Include="Services\OrderService.cs" />
+    <Compile Include="Services\IReviewService.cs" />
+    <Compile Include="Services\ReviewService.cs" />
+    <Compile Include="Services\IUserService.cs" />
+    <Compile Include="Services\UserService.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
